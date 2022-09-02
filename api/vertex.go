@@ -327,28 +327,43 @@ func (v *vertex) Property(key, value interface{}) interfaces.Vertex {
 //	(\"key\",\"value\")
 // Depending on the given type of the value the quotes for the value are omitted.
 // e.g. ("temperature",23.02) or ("available",true)
-func toKeyValueString(key, value interface{}) (string, error) {
+func toKeyValueString(key interface{}, value interface{}) (string, error) {
+	var keyParam string
+	switch castedKey := key.(type) {
+	case string:
+		keyParam = fmt.Sprintf("\"%s\"", castedKey)
+	case T:
+		keyParam = string(castedKey)
+	default:
+		fmt.Printf("[warn] Key type %T is not supported in toKeyValueString(). Attempting to cast it to string\n", castedKey)
+		asStr, err := cast.ToStringE(castedKey)
+		if err != nil {
+			return "", errors.Wrapf(err, "cast %T to string failed for key (You could either implement the Stringer interface for this type or cast it to string beforehand)", castedKey)
+		}
+		keyParam = fmt.Sprintf("\"%s\"", asStr)
+	}
+
 	switch casted := value.(type) {
 	case *simpleQueryBuilder:
-		return fmt.Sprintf("(\"%s\",%s)", key, casted.String()), nil
+		return fmt.Sprintf("(%s,%s)", keyParam, casted.String()), nil
 	case string:
-		return fmt.Sprintf("(\"%s\",\"%s\")", key, Escape(casted)), nil
+		return fmt.Sprintf("(%s,\"%s\")", keyParam, Escape(casted)), nil
 	case bool:
-		return fmt.Sprintf("(\"%s\",%t)", key, casted), nil
+		return fmt.Sprintf("(%s,%t)", keyParam, casted), nil
 	case int, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
-		return fmt.Sprintf("(\"%s\",%d)", key, casted), nil
+		return fmt.Sprintf("(%s,%d)", keyParam, casted), nil
 	case float64:
-		return fmt.Sprintf("(\"%s\",%f)", key, casted), nil
+		return fmt.Sprintf("(%s,%f)", keyParam, casted), nil
 	case time.Time:
-		return fmt.Sprintf("(\"%s\",\"%s\")", key, casted.String()), nil
+		return fmt.Sprintf("(%s,\"%s\")", keyParam, casted.String()), nil
 	case fmt.Stringer:
-		return fmt.Sprintf("(\"%s\",\"%s\")", key, Escape(casted.String())), nil
+		return fmt.Sprintf("(%s,\"%s\")", keyParam, Escape(casted.String())), nil
 	default:
-		fmt.Printf("[warn] Type %T is not supported in v.toKeyValueString() will try to cast to string\n", casted)
+		fmt.Printf("[warn] Value type %T is not supported in toKeyValueString(). Attempting to castit to string\n", casted)
 		asStr, err := cast.ToStringE(casted)
 		if err != nil {
 			return "", errors.Wrapf(err, "cast %T to string failed (You could either implement the Stringer interface for this type or cast it to string beforehand)", casted)
 		}
-		return fmt.Sprintf("(\"%s\",\"%s\")", key, Escape(asStr)), nil
+		return fmt.Sprintf("(%s,\"%s\")", keyParam, Escape(asStr)), nil
 	}
 }

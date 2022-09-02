@@ -44,6 +44,17 @@ type ValueWithID struct {
 
 type VertexPropertyMap map[string][]ValueWithID
 
+// T defines gremlin Tokens
+type T string
+
+const (
+	TId T = "id"
+	TLabel T = "label"
+	TKey = "key"
+	TValue = "value"
+)
+
+
 // Type defines the cosmos db complex types
 type Type string
 
