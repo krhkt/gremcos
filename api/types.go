@@ -2,8 +2,9 @@ package api
 
 import (
 	"fmt"
-
+	
 	"github.com/spf13/cast"
+	"github.com/supplyon/gremcos/interfaces"
 )
 
 // Property represents the cosmos db type for a property.
@@ -119,6 +120,10 @@ func (tv TypedValue) AsStringE() (string, error) {
 
 func (tv TypedValue) AsString() string {
 	return UnEscape(cast.ToString(tv.Value))
+}
+
+func (tv TypedValue) AsTrustedStringValue() interfaces.TrustedStringValue {
+	return interfaces.TrustedStringValue(cast.ToString(tv.Value))
 }
 
 func (tv TypedValue) String() string {
