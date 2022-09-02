@@ -2,6 +2,9 @@ package interfaces
 
 import "github.com/gofrs/uuid"
 
+// Type used to avoid escaping strings with special characters when building a query string
+type TrustedStringValue string
+
 type Order string
 
 const (

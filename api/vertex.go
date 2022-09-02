@@ -331,6 +331,8 @@ func toKeyValueString(key, value interface{}) (string, error) {
 	switch casted := value.(type) {
 	case *simpleQueryBuilder:
 		return fmt.Sprintf("(\"%s\",%s)", key, casted.String()), nil
+	case interfaces.TrustedStringValue:
+		return fmt.Sprintf("(\"%s\",\"%s\")", key, casted), nil
 	case string:
 		return fmt.Sprintf("(\"%s\",\"%s\")", key, Escape(casted)), nil
 	case bool:
